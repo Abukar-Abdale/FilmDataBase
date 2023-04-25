@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="io.github.willena.sqlite.jdbc" type="repository">
+    <properties maven-id="io.github.willena:sqlite-jdbc:3.41.2.0" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/sqlite-jdbc-3.41.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/sqlite-jdbc-3.41.2.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>
