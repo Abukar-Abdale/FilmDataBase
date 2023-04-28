@@ -1,20 +1,18 @@
-import java.net.*;
-import java.io.*;
-import java.sql.SQLException;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class OMDBApi {
 
-    private String apiKey;
+    private final String apiKey;
 
     public OMDBApi(String apiKey) {
         this.apiKey = apiKey;
     }
-
-
-
-
-
     public Movie getMovie(String title) {
         String url = "http://www.omdbapi.com/?apikey=" + apiKey + "&t=" + title;
         Movie movie = null;
@@ -30,17 +28,21 @@ public class OMDBApi {
             }
             in.close();
             con.disconnect();
+
+            JsonObject response = JsonParser.parseString(content.toString()).getAsJsonObject();
+
+            if (response.get("Response").getAsString().equals("False")) {
+                // Movie not found
+                System.out.println("Movie not found");
+                return null;
+            }
             movie = Movie.fromJson(content.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (movie == null) {
-            System.out.println("Movie not found");
-        } else {
-            System.out.println(movie.toString());
-        }
         return movie;
     }
+
 
 
     public Movie[] getMovie(String title, String year) {
@@ -89,8 +91,4 @@ public class OMDBApi {
         }
         return movie;
     }
-
-
 }
-
-

@@ -1,19 +1,35 @@
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+
 public class Movie {
+    @SerializedName("Title")
     private String title;
+    @SerializedName("Year")
     private String year;
+    @SerializedName("Rated")
     private String rated;
+    @SerializedName("Released")
     private String released;
+    @SerializedName("Runtime")
     private String runtime;
+    @SerializedName("Genre")
     private String genre;
+    @SerializedName("Director")
     private String director;
+    @SerializedName("Writer")
     private String writer;
+    @SerializedName("Actors")
     private String actors;
+    @SerializedName("Plot")
     private String plot;
+    @SerializedName("Language")
     private String language;
+    @SerializedName("Country")
     private String country;
+    @SerializedName("Awards")
     private String awards;
+    @SerializedName("Poster")
     private String poster;
     @SerializedName("Metascore")
     private String metascore;
@@ -26,17 +42,19 @@ public class Movie {
     @SerializedName("Type")
     private String type;
 
+
+
+
     public static Movie fromJson(String json) {
         Gson gson = new Gson();
-        return gson.fromJson(json, Movie.class);
+        try {
+            return gson.fromJson(json, Movie.class);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    public Movie(String title, String director, int year, String genre) {
-        this.title = title;
-        this.director = director;
-        this.year = Integer.toString(year);
-        this.genre = genre;
-    }
     public Movie(String title, String year, String rated, String released, String runtime, String genre,
                  String director, String writer, String actors, String plot, String language, String country,
                  String awards, String poster, String metascore, String imdbRating, String imdbVotes,
@@ -62,9 +80,8 @@ public class Movie {
         this.type = type;
     }
 
-    public static Movie[] fromJsonArray(String toString) {
-        Gson gson = new Gson();
-        return gson.fromJson(toString, Movie[].class);
+    public static Movie[] getMovie(String title) {
+        return new Movie[0];
     }
 
 
@@ -86,6 +103,23 @@ public class Movie {
 
     public String getType() {
         return type;
+    }
+
+
+    public void setImdbRating(String imdbRating) {
+        this.imdbRating = imdbRating;
+    }
+
+    public void setImdbVotes(String imdbVotes) {
+        this.imdbVotes = imdbVotes;
+    }
+
+    public void setImdbID(String imdbID) {
+        this.imdbID = imdbID;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public void setTitle(String title) {
@@ -200,6 +234,10 @@ public class Movie {
         return metascore;
     }
 
+    public void setMetascore(String metascore) {
+        this.metascore = metascore;
+    }
+
     // Add toString() method to print the fields of the movie object
 
     @Override
@@ -228,4 +266,7 @@ public class Movie {
     }
 
 
+    public int getId() {
+            return 0;
+    }
 }

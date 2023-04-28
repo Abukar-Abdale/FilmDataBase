@@ -1,27 +1,218 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.*;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
-
-
+import java.util.Set;
 
 public class SQLite {
 
     private Connection connection;
-    private List<Movie> database;
 
-    public SQLite(String dbName) throws SQLException {
-        String url = "jdbc:sqlite:" + database;
-        connection = DriverManager.getConnection(url);
+    public SQLite(String database) throws SQLException {
+        try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + database);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
+
     public void createMoviesTable() throws SQLException {
-        Statement statement = connection.createStatement();
-        statement.executeUpdate("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, year INTEGER, imdbID TEXT, type TEXT, poster TEXT, runtime TEXT, genre TEXT, director TEXT, writer TEXT, actors TEXT, plot TEXT, language TEXT, country TEXT, awards TEXT, imdbRating REAL, imdbVotes INTEGER, boxOffice REAL)");
+        try {
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS movies ( id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, released TEXT, year TEXT, imdbID TEXT, type TEXT, poster TEXT, runtime TEXT, genre TEXT, director TEXT, writer TEXT, actors TEXT, plot TEXT, language TEXT, country TEXT, awards TEXT, rated TEXT, metascore TEXT, imdbRating TEXT, imdbVotes TEXT)");
+            System.out.println("Table 'movies' has been created.");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
+
+    public void addMovie(Movie movie) throws SQLException {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO movies (title, released, year, imdbID, type, poster, runtime, genre, director, writer, actors, plot, language, country, awards, rated, metascore, imdbRating, imdbVotes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            preparedStatement.setString(1, movie.getTitle());
+            preparedStatement.setString(2, movie.getReleased());
+            preparedStatement.setString(3, movie.getYear());
+            preparedStatement.setString(4, movie.getImdbID());
+            preparedStatement.setString(5, movie.getType());
+            preparedStatement.setString(6, movie.getPoster());
+            preparedStatement.setString(7, movie.getRuntime());
+            preparedStatement.setString(8, movie.getGenre());
+            preparedStatement.setString(9, movie.getDirector());
+            preparedStatement.setString(10, movie.getWriter());
+            preparedStatement.setString(11, movie.getActors());
+            preparedStatement.setString(12, movie.getPlot());
+            preparedStatement.setString(13, movie.getLanguage());
+            preparedStatement.setString(14, movie.getCountry());
+            preparedStatement.setString(15, movie.getAwards());
+            preparedStatement.setString(16, movie.getRated());
+            preparedStatement.setString(17, movie.getMetascore());
+            preparedStatement.setString(18, movie.getImdbRating());
+            preparedStatement.setString(19, movie.getImdbVotes());
+            preparedStatement.executeUpdate();
+            System.out.println("Movie added successfully");
+        } catch (SQLException e) {
+            if (e.getErrorCode() == 19) {
+                System.out.println("Movie already exists");
+            } else {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public Movie[] getMovie(String title) throws SQLException {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM movies WHERE title LIKE ?");
+            preparedStatement.setString(1, "%" + title + "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Movie> movies = new ArrayList<>();
+            while (resultSet.next()) {
+                Movie movie = createMovieFromResultSet(resultSet);
+                movies.add(movie);
+            }
+            return movies.toArray(new Movie[0]);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return new Movie[0];
+        }
+    }
+
+
+
+
+
+
+    public Movie[] getMovie(String title, String year) throws SQLException {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM movies WHERE title LIKE ? AND year = ?");
+            preparedStatement.setString(1, "%" + title + "%");
+            preparedStatement.setString(2, year);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Movie> movies = new ArrayList<>();
+            while (resultSet.next()) {
+                Movie movie = createMovieFromResultSet(resultSet);
+                movies.add(movie);
+            }
+            return movies.toArray(new Movie[0]);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return new Movie[0];
+        }
+    }
+
+
+/*
+    public Movie[] getMovie(String title, String year, String type) throws SQLException {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM movies WHERE title = ? AND year = ? AND type = ?");
+            preparedStatement.setString(1, title);
+            preparedStatement.setString(2, year);
+            preparedStatement.setString(3, type);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Movie> movies = new ArrayList<>();
+            while (resultSet.next()) {
+                Movie movie = createMovieFromResultSet(resultSet);
+                movies.add(movie);
+            }
+            return movies.toArray(new Movie[0]);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return new Movie[0];
+        }
+    }  */
+
+    public Movie[] getActor(String actor) throws SQLException {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM movies WHERE actors LIKE ?");
+            preparedStatement.setString(1, "%" + actor + "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Movie> movies = new ArrayList<>();
+            while (resultSet.next()) {
+                Movie movie = createMovieFromResultSet(resultSet);
+                movies.add(movie);
+            }
+            return movies.toArray(new Movie[0]);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return new Movie[0];
+        }
+    }
+
+
+    public Movie[] getDirector(String director) throws SQLException {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM movies WHERE director LIKE ?");
+            preparedStatement.setString(1, "%" + director + "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Movie> movies = new ArrayList<>();
+            while (resultSet.next()) {
+                Movie movie = createMovieFromResultSet(resultSet);
+                movies.add(movie);
+            }
+            return movies.toArray(new Movie[0]);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return new Movie[0];
+        }
+    }
+
+    public Movie[] getGenre(String genre) throws SQLException {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM movies WHERE genre LIKE ?");
+            preparedStatement.setString(1, "%" + genre + "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Movie> movies = new ArrayList<>();
+            while (resultSet.next()) {
+                Movie movie = createMovieFromResultSet(resultSet);
+                movies.add(movie);
+            }
+            return movies.toArray(new Movie[0]);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return new Movie[0];
+        }
+    }
+
+    public Movie[] getYear(String year) throws SQLException {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM movies WHERE year = ?");
+            preparedStatement.setString(1, year);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Movie> movies = new ArrayList<>();
+            while (resultSet.next()) {
+                Movie movie = createMovieFromResultSet(resultSet);
+                movies.add(movie);
+            }
+            return movies.toArray(new Movie[0]);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return new Movie[0];
+        }
+    }
+
+    private Movie createMovieFromResultSet(ResultSet resultSet) throws SQLException {
+        Movie movie = new Movie( null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        movie.setTitle(resultSet.getString("title"));
+        movie.setReleased(resultSet.getString("released"));
+        movie.setYear(resultSet.getString("year"));
+        movie.setImdbID(resultSet.getString("imdbID"));
+        movie.setType(resultSet.getString("type"));
+        movie.setPoster(resultSet.getString("poster"));
+        movie.setRuntime(resultSet.getString("runtime"));
+        movie.setGenre(resultSet.getString("genre"));
+        movie.setDirector(resultSet.getString("director"));
+        movie.setWriter(resultSet.getString("writer"));
+        movie.setActors(resultSet.getString("actors"));
+        movie.setPlot(resultSet.getString("plot"));
+        movie.setLanguage(resultSet.getString("language"));
+        movie.setCountry(resultSet.getString("country"));
+        movie.setAwards(resultSet.getString("awards"));
+        movie.setRated(resultSet.getString("rated"));
+        movie.setMetascore(resultSet.getString("metascore"));
+        movie.setImdbRating(resultSet.getString("imdbRating"));
+        movie.setImdbVotes(resultSet.getString("imdbVotes"));
+        return movie;
+    }
+
 
 
     public void close() throws SQLException {
@@ -30,165 +221,8 @@ public class SQLite {
         }
     }
 
-
-    public Movie[] getMovie(String title) throws SQLException {
-        String query = "SELECT * FROM movies WHERE title LIKE ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, "%" + title + "%");
-        ResultSet resultSet = statement.executeQuery();
-        ArrayList<Movie> movies = new ArrayList<Movie>();
-        while (resultSet.next()) {
-            String movieTitle = resultSet.getString("title");
-            String director = resultSet.getString("director");
-            int year = resultSet.getInt("year");
-            String genre = resultSet.getString("genre");
-            Movie movie = new Movie(movieTitle, director, year, genre);
-            movies.add(movie);
-
-        }
-        return movies.toArray(new Movie[movies.size()]);
-    }
-
-    public Movie[] getMovie(String title, String year) throws SQLException {
-        String query = "SELECT * FROM movies WHERE title LIKE ? AND year = ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, "%" + title + "%");
-        statement.setInt(2, Integer.parseInt(year));
-        ResultSet resultSet = statement.executeQuery();
-        ArrayList<Movie> movies = new ArrayList<Movie>();
-        while (resultSet.next()) {
-            String movieTitle = resultSet.getString("title");
-            String director = resultSet.getString("director");
-            int movieYear = resultSet.getInt("year");
-            String genre = resultSet.getString("genre");
-            Movie movie = new Movie(movieTitle, director, movieYear, genre);
-            movies.add(movie);
-        }
-        return movies.toArray(new Movie[movies.size()]);
-    }
-
-    public Movie[] getMovie(String title, String year, String type) throws SQLException {
-        String query = "SELECT * FROM movies WHERE title LIKE ? AND year = ? AND type LIKE ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, "%" + title + "%");
-        statement.setInt(2, Integer.parseInt(year));
-        statement.setString(3, "%" + type + "%");
-        ResultSet resultSet = statement.executeQuery();
-        ArrayList<Movie> movies = new ArrayList<Movie>();
-        while (resultSet.next()) {
-            String movieTitle = resultSet.getString("title");
-            String director = resultSet.getString("director");
-            int movieYear = resultSet.getInt("year");
-            String genre = resultSet.getString("genre");
-            Movie movie = new Movie(movieTitle, director, movieYear, genre);
-            movies.add(movie);
-        }
-        return movies.toArray(new Movie[movies.size()]);
-    }
-
-    public Movie[] getActor(String actor) throws SQLException {
-        String query = "SELECT * FROM movies WHERE actor LIKE ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, "%" + actor + "%");
-        ResultSet resultSet = statement.executeQuery();
-        ArrayList<Movie> movies = new ArrayList<Movie>();
-        while (resultSet.next()) {
-            String movieTitle = resultSet.getString("title");
-            String director = resultSet.getString("director");
-            int movieYear = resultSet.getInt("year");
-            String genre = resultSet.getString("genre");
-            Movie movie = new Movie(movieTitle, director, movieYear, genre);
-            movies.add(movie);
-        }
-        return movies.toArray(new Movie[movies.size()]);
-    }
-
-    public Movie[] getDirector(String director) throws SQLException {
-        String query = "SELECT * FROM movies WHERE director LIKE ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, "%" + director + "%");
-        ResultSet resultSet = statement.executeQuery();
-        ArrayList<Movie> movies = new ArrayList<Movie>();
-        while (resultSet.next()) {
-            String movieTitle = resultSet.getString("title");
-            String movieDirector = resultSet.getString("director");
-            int movieYear = resultSet.getInt("year");
-            String genre = resultSet.getString("genre");
-            Movie movie = new Movie(movieTitle, movieDirector, movieYear, genre);
-            movies.add(movie) ;
-        }
-        return movies.toArray(new Movie[movies.size()]);
-    }
-
-    public Movie[] getGenre(String genre) throws SQLException {
-        String query = "SELECT * FROM movies WHERE genre LIKE ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setString(1, "%" + genre + "%");
-        ResultSet resultSet = statement.executeQuery();
-        ArrayList<Movie> movies = new ArrayList<Movie>();
-        while (resultSet.next()) {
-            String movieTitle = resultSet.getString("title");
-            String director = resultSet.getString("director");
-            int movieYear = resultSet.getInt("year");
-            String movieGenre = resultSet.getString("genre");
-            Movie movie = new Movie (movieTitle, director, movieYear, movieGenre);
-            movies.add(movie);
-        }
-        return movies.toArray(new Movie[movies.size()]);
-    }
-
-    public Movie[] getYear(String year) throws SQLException {
-        String query = "SELECT * FROM movies WHERE year = ?";
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setInt(1, Integer.parseInt(year));
-        ResultSet resultSet = statement.executeQuery();
-        ArrayList<Movie> movies = new ArrayList<Movie>();
-        while (resultSet.next()) {
-            String movieTitle = resultSet.getString("title");
-            String director = resultSet.getString("director");
-            int movieYear = resultSet.getInt("year");
-            String genre = resultSet.getString("genre");
-            Movie movie = new Movie(movieTitle, director, movieYear, genre);
-            movies.add(movie);
-        }
-        return movies.toArray(new Movie[movies.size()]);
-    }
-    public void addMovie(Movie movie) {
-        // Lägg till filmen i databasen
-        database.add(movie);
-
-        // Bekräfta att filmen har lagts till
-        System.out.println("Filmen " + movie.getTitle() + " har lagts till i databasen.");
-    }
-
-    public Movie[] getAllMovies() {
-        // Returnera alla filmer i databasen
-        return database.toArray(new Movie[database.size()]);
-
-    }
-
-    /*public Director[] getAllDirectors() {
-        // Returnera alla regissörer i databasen
-        return database.toArray(new Director[database.size()]);
-    } */
-
-    public String[] getAllGenres() {
-        // Returnera alla genrer i databasen
-        return database.toArray(new String[database.size()]);
-    }
-
-    public int[] getAllYears() {
-        List<Integer> years = new ArrayList<Integer>();
-        for (Movie movie : database) {
-            years.add(Integer.parseInt(movie.getYear()));
-        }
-        return years.stream().mapToInt(i -> i).toArray();
-    }
-
-
-    public String[] getAllActors() {
-        // Returnera alla skådespelare i databasen
-        return database.toArray(new String[database.size()]);
+    public List<Movie> getAllMovies() {
+            return null;
     }
 }
 
